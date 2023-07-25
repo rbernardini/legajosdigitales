@@ -6,6 +6,50 @@
   </head>
   <body>
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+    <form id="documentNumberForm">
+      <label for="documentNumber">Ingrese DNI a buscar:</label>
+      <input type="text" id="documentNumber" name="documentNumber" required>
+      <button type="submit">Search</button>
+    </form>
+  
+    <div id="results"></div>
+  
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('documentNumberForm');
+        const resultsDiv = document.getElementById('results');
+  
+        form.addEventListener('submit', async (event) => {
+          event.preventDefault();
+          const formData = new FormData(form);
+          const documentNumber = formData.get('documentNumber');
+  
+          try {
+            const response = await fetch(`/search/${documentNumber}`);
+            const data = await response.json();
+            displayResults(data);
+          } catch (error) {
+            console.error('An error occurred while fetching data:', error);
+            resultsDiv.textContent = 'An error occurred while fetching data.';
+          }
+        });
+  
+        function displayResults(results) {
+          let html = '<h2>Resultados de b&uacute;squeda:</h2>';
+          if (results.length > 0) {
+            html += '<ul>';
+            results.forEach((result) => {
+              html += `<li>DNI: ${result.Documento}, Nombre: ${result.APENOMBRE}</li>`;
+              // Replace "id" and "name" with the appropriate column names from your SQL query
+            });
+            html += '</ul>';
+          } else {
+            html += '<p>No se encuentran datos</p>';
+          }
+  
+          resultsDiv.innerHTML = html;
+        }
+      });
+    </script>
+    </body>
 </html>
