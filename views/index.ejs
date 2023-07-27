@@ -3,6 +3,8 @@
   <head>
     <title><%= title %></title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <link rel="icon" href="/images/Favicon-Azul-005dea-64x64.png" sizes="32x32">
+    <link rel="icon" href="/images/Favicon-Azul-005dea.png" sizes="192x192">
   </head>
   <body>
     <h1><%= title %></h1>
@@ -20,34 +22,51 @@
         const resultsDiv = document.getElementById('results');
   
         form.addEventListener('submit', async (event) => {
+          resultsDiv.innerHTML = '';
           event.preventDefault();
           const formData = new FormData(form);
           const documentNumber = formData.get('documentNumber');
   
           try {
-            const response = await fetch(`/search/${documentNumber}`);
-            const data = await response.json();
-            displayResults(data);
+            var response = await fetch(`/search/${documentNumber}`);
+            var data = await response.json();
+            displayResults(data,'Tarjetas en Crediware');
+
+            response = await fetch(`/search_prest_cw/${documentNumber}`);
+            data = await response.json();
+            displayResults(data,'Pr&eacute;stamos en Crediware');
+
+            response = await fetch(`/search_odin/${documentNumber}`);
+            data = await response.json();
+            displayResults(data,'Pr&eacute;stamos en ODIN');
+
           } catch (error) {
             console.error('An error occurred while fetching data:', error);
             resultsDiv.textContent = 'An error occurred while fetching data.';
           }
         });
   
-        function displayResults(results) {
-          let html = '<h2>Resultados de b&uacute;squeda:</h2>';
+        function displayResults(results,titulo) {
+          let html = '<h2>'+titulo+':</h2>';
           if (results.length > 0) {
-            html += '<ul>';
+            // ENcabezado de la tabla
+            html += '<table><thead><tr>';
+            Object.keys(results[0]).forEach((columna) => {html += `<th>${columna}</th>`})
+            html += '</tr></thead>';
+
+            // cuerpo
+            html += '<tbody>';
             results.forEach((result) => {
-              html += `<li>DNI: ${result.Documento}, Nombre: ${result.APENOMBRE}</li>`;
-              // Replace "id" and "name" with the appropriate column names from your SQL query
+              html += '<tr>';
+              Object.values(result).forEach((columna) => {html += `<td>${columna}</td>`})
+              html += '</tr>';
             });
-            html += '</ul>';
+            html += '</tbody></table>';
           } else {
             html += '<p>No se encuentran datos</p>';
           }
   
-          resultsDiv.innerHTML = html;
+          resultsDiv.innerHTML += html;
         }
       });
     </script>
